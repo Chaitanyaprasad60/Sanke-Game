@@ -8,3 +8,6 @@ I use a random coordinate generator to place the fruit(food) for the snake due t
 # To Run in Local 
 pip3 install pygame #To Install Dependencies <br>
 py snakegame.py
+
+![image](https://github.com/Chaitanyaprasad60/Sanke-Game/assets/49819086/075603eb-8c16-4aab-a00d-f793148e0e39)
+
