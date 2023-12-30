@@ -1,47 +1,62 @@
 import pygame,sys,time
 from pygame.locals import *
-#import pyautogui
 import random
 
 pygame.init()
-l=800
-br=600
-DISPLAYSURF=pygame.display.set_mode((l,br))
-pygame.display.set_caption(' world')
-a=10
-b=200
-WHITE=(255,255,255)
-PURPLE=(255,0,255)
-RED=(255,0,0)
-BLACK=(0,255,0)
-AQUA=(0,255,255,200)
+
+screenLength=800
+screenBreadth=600
+DISPLAYSURF=pygame.display.set_mode((screenLength,screenBreadth)) #Define a screen of size lxb
+
+
+pygame.display.set_caption(' SNAKE WORLD')
+#Snake Head variables
+snakeHeadX=10
+snakeHeadY=200
+
+WHITE = (255,255,255)  #Defining Colors to use
+PURPLE = (255,0,255)
+RED = (255,0,0)
+BLACK = (0,0,0)
+AQUA = (0,255,255,200)
 DISPLAYSURF.fill(WHITE)
+
 fpsClock=pygame.time.Clock()
-k=1
-u=0
-x=[0,0,0,0,0,0,0,0]
-y=[0,0,0,0,0,0,0,0]
-f=5
+
+# Displaying Score of top left
+score = 0
+
+
+
+deltaX=10
+deltaY=0
+
+snakeBodyX=[0,0,0,0,0,0,0,0]
+snakeBodyY=[0,0,0,0,0,0,0,0]
+snakeLength=5
+
 xf=random.randrange(20,380,10)
 yf=random.randrange(20,280,10)
+
 fruit=pygame.image.load('fruit.jpg')
+# Furit Position in game initial condition. 
 DISPLAYSURF.blit(fruit,(150,150))
 
+#function definition to avoid boundary hit 
+# Snake goes into wall and comes out on opposite side
+def boundary(snakeHeadX,snakeHeadY):
+    global screenBreadth
+    if snakeHeadX>screenLength:
+        snakeHeadX=snakeHeadX-screenLength
+    elif snakeHeadX<0:
+        snakeHeadX=snakeHeadX+screenLength
 
-def boundary(a,b):
-                                             #function definition to avoid boundary hit
-    global br
-    if a>l:
-        a=a-l
-    elif a<0:
-        a=a+l
-
-    if b>br:
-        b=b-br
-    elif b<0:
-        b=b+br
+    if snakeHeadY>screenBreadth:
+        snakeHeadY=snakeHeadY-screenBreadth
+    elif snakeHeadY<0:
+        snakeHeadY=snakeHeadY+screenBreadth
         
-    return [a,b]
+    return [snakeHeadX,snakeHeadY]
 
 end=0
     
@@ -49,83 +64,81 @@ end=0
 
 while True:
    
-    DISPLAYSURF.fill(WHITE)
-    
+    DISPLAYSURF.fill(WHITE)    
     pygame.draw.rect(DISPLAYSURF,AQUA,(0,0,40,40))
+    scoreLabel = pygame.font.SysFont("Times New Roman", 25).render(str(score), 1, BLACK)
+    DISPLAYSURF.blit(scoreLabel,(10,5))
+
+
     for event in pygame.event.get():
-        if event.type== pygame.KEYDOWN:
-            
+
+        #Detecting a keyboard Stroke - w,a,s,d
+        if event.type == pygame.KEYDOWN:        
             
             if event.key == ord("a"):
-                k=-10
-                u=0
+                deltaX=-10
+                deltaY=0
             elif event.key == ord("s"):
-                k=0
-                u=10
+                deltaX=0
+                deltaY=10
             elif event.key == ord("w"):
-                k=0
-                u=-10
+                deltaX=0
+                deltaY=-10
             elif event.key == ord("d"):
-                k=10
-                u=0
+                deltaX=10
+                deltaY=0
             
-        elif event.type==QUIT or end==1:
-            
+        elif event.type == QUIT or end==1:            
             pygame.quit()
             sys.exit()
     
     
     
     
-    x[1]=a
-    y[1]=b
-    for i in range(f,0,-1):
-        x[i+1]=x[i]
-        y[i+1]=y[i]
+    snakeBodyX[1] = snakeHeadX
+    snakeBodyY[1] = snakeHeadY
+    for i in range(snakeLength,0,-1):
+        snakeBodyX[i+1] = snakeBodyX[i]
+        snakeBodyY[i+1] = snakeBodyY[i]
     
     
-    a=a+k
-    b=b+u
+    # Update Snake Head Varibales.
+    snakeHeadX += deltaX
+    snakeHeadY += deltaY
     
 
-    [a,b]=boundary(a,b)                                     #function call to avoid boundary hit
+    [snakeHeadX,snakeHeadY] = boundary(snakeHeadX,snakeHeadY)   #function call to avoid boundary hit
 
-    for i in range(2,f):
-        if a==x[i] and b==y[i]:
-            #pygame.draw.rect(DISPLAYSURF, BLACK, (40, 40, 40, 10))
-            end=1
-            
+    # To Check if Snakes head is touching it's body anywhere. 
+    for i in range(2,snakeLength):
+        if snakeHeadX == snakeBodyX[i] and snakeHeadY == snakeBodyY[i]:
+
+            end=1            
             pygame.time.wait(1000)
             pygame.quit()
-            sys.exit()
-    
-            
-            
-            
-    
+            sys.exit()  
 
-    for i in range(1,f):
-        pygame.draw.rect(DISPLAYSURF, RED, (x[i], y[i], 12, 12))
-    
-    #pygame.draw.rect(DISPLAYSURF, PURPLE, (xf, yf, 10, 10))
-    DISPLAYSURF.blit(fruit,(xf,yf))                              #fruit size 15x21 pixels
 
-    if a in range(xf-5,xf+10) and b in range(yf-5,yf+21):
+    # Drawing the updated SNAKE
+    for i in range(1,snakeLength):
+        pygame.draw.rect(DISPLAYSURF, RED, (snakeBodyX[i], snakeBodyY[i], 12, 12))
+    
+    DISPLAYSURF.blit(fruit,(xf,yf))   #fruit size 15x21 pixels
+
+    #Isf Head is around Furit, Increase Score and Generate New Fruit. 
+    if snakeHeadX in range(xf-5,xf+10) and snakeHeadY in range(yf-5,yf+21):        
         
-        
-        f=f+1
-        x.append(0)
-        y.append(0)
-        print(f)
+        snakeLength+=1
+        score+=1
+        snakeBodyX.append(0)
+        snakeBodyY.append(0)
+
+        #Generating next fruit in a random Place
         xf=random.randrange(20,380,10)
         yf=random.randrange(20,280,10)
         
-        #time.sleep(10)
-        #pygame.quit()
-        #sys.exit()
     
-    
-        
+    # One Game cycle complete, update the screen to show all changes to DISPLAYSURF    
     pygame.display.update() 
     fpsClock.tick(8)
     
